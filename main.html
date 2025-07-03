@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Schedule</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            z-index: 1;
+            position: relative;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+            z-index: 1;
+            position: relative;
+        }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            padding: 40px 30px;
+        }
+
+        .time-block {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .time-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .time-block:hover::before {
+            transform: translateX(100%);
+        }
+
+        .time-block:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .morning { border-left-color: #ff6b6b; }
+        .afternoon { border-left-color: #4ecdc4; }
+        .evening { border-left-color: #45b7d1; }
+        .night { border-left-color: #6c5ce7; }
+
+        .time-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f3f4;
+        }
+
+        .time-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            margin-right: 15px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .morning .time-icon { background: linear-gradient(45deg, #ff6b6b, #ff8e8e); }
+        .afternoon .time-icon { background: linear-gradient(45deg, #4ecdc4, #6dd5ed); }
+        .evening .time-icon { background: linear-gradient(45deg, #45b7d1, #74c0fc); }
+        .night .time-icon { background: linear-gradient(45deg, #6c5ce7, #a29bfe); }
+
+        .time-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .event-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .event-item:hover {
+            background: #e9ecef;
+            border-color: #dee2e6;
+            transform: translateX(5px);
+        }
+
+        .event-time {
+            font-weight: bold;
+            color: #495057;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .event-title {
+            font-size: 1.1em;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .event-description {
+            color: #6c757d;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+
+        .highlight {
+            background: linear-gradient(45deg, #ffd700, #ffed4a);
+            color: #2c3e50;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .highlight:hover {
+            background: linear-gradient(45deg, #ffed4a, #ffd700);
+        }
+
+        .live-music {
+            background: linear-gradient(45deg, #e74c3c, #f39c12);
+            color: white;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(231, 76, 60, 0.3);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 10px 30px rgba(231, 76, 60, 0.3); }
+            to { box-shadow: 0 15px 40px rgba(231, 76, 60, 0.5); }
+        }
+
+        @media (max-width: 768px) {
+            .schedule-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .time-block {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Event Schedule</h1>
+            <p>Your complete guide to an amazing day of activities</p>
+        </div>
+
+        <div class="schedule-grid">
+            <div class="time-block morning">
+                <div class="time-header">
+                    <div class="time-icon">🌅</div>
+                    <div class="time-title">Morning Sessions</div>
+                </div>
+                
+                <div class="event-item">
+                    <div class="event-time">11:20 - 11:50</div>
+                    <div class="event-title">Pitch, please!</div>
+                    <div class="event-description">30 min - Networking game</div>
+                </div>
+                
+                <div class="event-item">
+                    <div class="event-time">12:00 - 12:30</div>
+                    <div class="event-title">Yoga & Mindfulness</div>
+                    <div class="event-description">30 min - Wellness</div>
+                </div>
+            </div>
+
+            <div class="time-block afternoon">
+                <div class="time-header">
+                    <div class="time-icon">☀️</div>
+                    <div class="time-title">Afternoon Activities</div>
+                </div>
+                
+                <div class="event-item">
+                    <div class="event-time">12:20 - 1:00</div>
+                    <div class="event-title">Networking Blind Date - Round 1</div>
+                    <div class="event-description">40min - Networking across four topics</div>
+                </div>
+                
+                <div class="event-item">
+                    <div class="event-time">12:40 - 1:10</div>
+                    <div class="event-title">Dance Class</div>
+                    <div class="event-description">1 hr - Creative, with facilitation</div>
+                </div>
+                
+                <div class="event-item highlight">
+                    <div class="event-time">1:10 - 1:15</div>
+                    <div class="event-title">Official Opening</div>
+                </div>
+                
+                <div class="event-item">
+                    <div class="event-time">1:20 - 1:50</div>
+                    <div class="event-title">TED Talk Station</div>
+                </div>
+                
+                <div class="event-item highlight">
+                    <div class="event-time">1:50</div>
+                    <div class="event-title">LUNCH</div>
+                </div>
+            </div>
+
+            <div class="time-block afternoon">
+                <div class="time-header">
+                    <div class="time-icon">🎨</div>
+                    <div class="time-title">Creative Sessions</div>
+                </div>
+                
+                <div class="event-item">
+                    <div class="event-time">2:10 - 2:40</div>
+                    <div class="event-title">TED Talk Station</div>
+                </div>
+                
+                <div class="event-item">
+                    <div class="event-time">2:50 - 3:50</div>
+                    <div class="event-title">Shopper Painting Station</div>
+                    <div class="event-description">1h - Creative, with facilitation</div>
+                </div>
+                
+                <div class="event-item">
+                    <div class="event-time">3:30 - 5:00</div>
+                    <div class="event-title">Networking</div>
+                    <div class="event-description">Free communication</div>
+                </div>
+                
+                <div class="event-item">
+                    <div class="event-time">3:50 - 4:20</div>
+                    <div class="event-title">Yoga & Mindfulness</div>
+                    <div class="event-description">Wellness</div>
+                </div>
+            </div>
+
+            <div class="time-block evening">
+                <div class="time-header">
+                    <div class="time-icon">🌆</div>
+                    <div class="time-title">Evening Program</div>
+                </div>
+                
+                <div class="event-item">
+                    <div class="event-time">4:20 - 4:50</div>
+                    <div class="event-title">Sketch & Chill</div>
+                    <div class="event-description">30 min - Professional Growth</div>
+                </div>
+                
+                <div class="event-item">
+                    <div class="event-time">4:20 - 5:00</div>
+                    <div class="event-title">Acting Class</div>
+                    <div class="event-description">40 min - Creative Zone, with facilitation</div>
+                </div>
+                
+                <div class="event-item">
+                    <div class="event-time">5:10 - 5:25</div>
+                    <div class="event-title">TED Talk Station</div>
+                    <div class="event-description">"How AI will impact IT"</div>
+                </div>
+                
+                <div class="event-item">
+                    <div class="event-time">5:35 - 6:15</div>
+                    <div class="event-title">Tech Charades / Alias</div>
+                    <div class="event-description">1 hr - Games</div>
+                </div>
+                
+                <div class="event-item">
+                    <div class="event-time">5:35 - 6:35</div>
+                    <div class="event-title">Shopper Painting Station</div>
+                    <div class="event-description">1h - Creative, with facilitation</div>
+                </div>
+            </div>
+
+            <div class="time-block night">
+                <div class="time-header">
+                    <div class="time-icon">🌙</div>
+                    <div class="time-title">Night Events</div>
+                </div>
+                
+                <div class="event-item">
+                    <div class="event-time">6:40 - 7:30</div>
+                    <div class="event-title">Networking Blind Date - Round 2</div>
+                </div>
+                
+                <div class="event-item">
+                    <div class="event-time">6:35 - 7:20</div>
+                    <div class="event-title">Mind Games</div>
+                    <div class="event-description">40 min - Games, with facilitation</div>
+                </div>
+                
+                <div class="event-item">
+                    <div class="event-time">7:20 - 7:40</div>
+                    <div class="event-title">Lottery Closes & Prize Draw</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="live-music">
+            🎵 7:45 PM - till end — LIVE MUSIC 🎵<br>
+            7:40 PM
+        </div>
+    </div>
+</body>
+</html>
